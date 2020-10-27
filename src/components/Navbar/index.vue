@@ -6,27 +6,13 @@
         mode="inline"
         theme="dark"
         :inline-collapsed="collapsed"
+        @click="selectedMenu"
     >
-      <a-menu-item key="1">
-        <PieChartOutlined />
-        <span>Option 1</span>
-      </a-menu-item>
-      <a-menu-item key="2">
-        <DesktopOutlined />
-        <span>Option 2</span>
-      </a-menu-item>
-      <a-menu-item key="3">
-        <InboxOutlined />
-        <span>Option 3</span>
-      </a-menu-item>
-      <a-sub-menu key="sub1">
+      <a-sub-menu v-for="subMenu in MENUS" :key="subMenu.path">
         <template v-slot:title>
-          <span><MailOutlined /><span>Navigation One</span></span>
+          <span><MailOutlined /><span>{{ subMenu.menuText }}</span></span>
         </template>
-        <a-menu-item key="5">Option 5</a-menu-item>
-        <a-menu-item key="6">Option 6</a-menu-item>
-        <a-menu-item key="7">Option 7</a-menu-item>
-        <a-menu-item key="8">Option 8</a-menu-item>
+        <a-menu-item v-for="menuItem in subMenu.children" :key="menuItem.path">{{ menuItem.menuText }}</a-menu-item>
       </a-sub-menu>
       <a-sub-menu key="sub2">
         <template v-slot:title>
@@ -48,24 +34,21 @@
 </template>
 
 <script>
+  import { MENUS } from '../../router/routes'
   import {
-    PieChartOutlined,
     MailOutlined,
-    DesktopOutlined,
-    InboxOutlined,
     AppstoreOutlined
-  } from '@ant-design/icons-vue';
+  } from '@ant-design/icons-vue'
+
   export default {
     name: 'NavBar',
     components: {
-      PieChartOutlined,
       MailOutlined,
-      DesktopOutlined,
-      InboxOutlined,
       AppstoreOutlined
     },
     data() {
       return {
+        MENUS,
         collapsed: false,
         selectedKeys: ['1'],
         openKeys: ['sub1'],
@@ -81,6 +64,9 @@
       toggleCollapsed() {
         this.collapsed = !this.collapsed;
         this.openKeys = this.collapsed ? [] : this.preOpenKeys;
+      },
+      selectedMenu(menuItem) {
+        this.$router.push(menuItem.key)
       }
     }
   }

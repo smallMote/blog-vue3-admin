@@ -1,5 +1,25 @@
 <template>
-  <!-- 导航 -->
-  <div class="nav-bar-container"></div>
+  <aside class="main-layout-aside">
+    <section class="nav-bar-container">
+      <Logo />
+      <NavBar />
+    </section>
+  </aside>
+  <section class="main-layout-main clearfix">
+    <header class="main-layout-header"></header>
+    <main class="main-layout-content">
+      <router-view />
+    </main>
+  </section>
 </template>
-<script></script>
+<script>
+  import Logo from '../components/Logo'
+  import NavBar from '../components/Navbar'
+  export default {
+    name: 'MainLayout',
+    components: {
+      Logo,
+      NavBar
+    }
+  }
+</script>
