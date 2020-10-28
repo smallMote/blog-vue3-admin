@@ -2,6 +2,8 @@ import Analysis from '../views/dashboard/Analysis'
 import Dashboard from '../views/dashboard/Dashboard'
 import Article from '../views/article/Article'
 import ArticleList from '../views/article/ArticleList'
+import Resources from '../views/resources/Resources'
+import Images from '../views/resources/Images'
 
 const routes = [
 	{
@@ -31,6 +33,19 @@ const routes = [
 				path: '/article/list',
 				component: ArticleList,
 				menuText: '文章列表'
+			}
+		]
+	},
+	{
+		path: '/resources',
+		menuText: '资源管理',
+		component: Resources,
+		redirect: '/resources/images',
+		children: [
+			{
+				path: '/resources/images',
+				component: Images,
+				menuText: '图片管理'
 			}
 		]
 	}
