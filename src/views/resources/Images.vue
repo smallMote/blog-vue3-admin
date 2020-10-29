@@ -21,8 +21,12 @@
         />
       </div>
       <div class="image-header-bottom">
+        <input ref="uploadImgs" multiple @change="handleImageInput" id="uploadImg" type="file"/>
         <a-space>
-          <a-button type="primary">上传图片</a-button>
+          <a-button @click="selectImgFiles()" type="primary">
+            <UploadOutlined />
+            上传图片
+          </a-button>
           <a-button type="primary">新建相册</a-button>
           <a-button type="primary">查看相册</a-button>
         </a-space>
@@ -49,6 +53,7 @@
   import { ref } from 'vue'
   import ImageCard from '../../components/ImageCard'
   import WaterFallLayout from '../../layout/WaterFallLayout'
+  import { UploadOutlined } from '@ant-design/icons-vue'
 
   const filterMenu = [
     {
@@ -68,21 +73,35 @@
     name: 'Images',
     components: {
       ImageCard,
-      WaterFallLayout
+      WaterFallLayout,
+      UploadOutlined
     },
     setup() {
       const images = ref([])
       const keywords = ref('')
+      const uploadImgs = ref(null)
 
       function onSearch(keywords = keywords.value) {
         images.value = searchImg(keywords)
+      }
+
+      function selectImgFiles() {
+        uploadImgs.value.click()
+      }
+
+      function handleImageInput(e) {
+        images.value = formatImgFiles(e.target.files)
       }
 
       return {
         images,
         keywords,
         filterMenu,
-        onSearch
+        uploadImgs,
+        onSearch,
+        selectImgFiles,
+        handleImageInput
+
       }
     }
   }
@@ -91,6 +110,61 @@
   function searchImg(keywords) {
     console.log(keywords)
     return []
+  }
+
+  // 图片上传控件监听
+  function formatImgFiles(files) {
+    // console.log(e.target.files)
+    const images = []
+    files.forEach(item => {
+      getImage(item).then(res => {
+        images.push(res)
+      })
+    })
+
+    function getImage(file) {
+      const reader = new FileReader()
+      const type = file.type
+      const isTrueType = /png/.test(type)
+      /* eslint-disable */
+      return new Promise(resolve => {
+        reader.onloadstart = function (e) {
+          // console.log('开始读取....', e)
+        }
+        reader.onprogress = function (e) {
+          // console.log('正在读取中....', e)
+          if (!isTrueType) {
+            console.log('类型不正确')
+            return false
+          }
+        }
+        reader.onabort = function (e) {
+          // console.log('中断读取....', e)
+          // console.log(file.type)
+          if (!isTrueType) {
+            console.log('类型不正确')
+          }
+        }
+        reader.onerror = function (e) {
+          // console.log('读取异常....', e)
+        }
+        reader.onload = function (e) {
+          console.log('成功读取....')
+          // console.log(e.target.result)
+          resolve({
+            reader,
+            lastModified: file.lastModified,
+            type: file.type,
+            size: file.size,
+            name: file.name,
+            base64: e.target.result
+          })
+        }
+        reader.readAsDataURL(file)
+      })
+      /* eslint-disable */
+    }
+    return Promise.all(images)
   }
 </script>
 
@@ -129,4 +203,15 @@
   }
 }
 
+
+// 自定义上传按钮
+.upload-btn {
+  display: inline-block;
+  line-height: 30px;
+}
+#uploadImg {
+  width: 0;
+  height: 0;
+  visibility: hidden;
+}
 </style>
