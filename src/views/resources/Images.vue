@@ -30,6 +30,14 @@
           <a-button type="primary">新建相册</a-button>
           <a-button type="primary">查看相册</a-button>
         </a-space>
+        <div v-show="images && images.length" class="preview-groups flex">
+          <div v-for="item in images" :key="item.name" class="preview-group-item">
+            <img :src="item.base64" :alt="item.name"/>
+            <a href="" class="preview-del-btn" @click.prevent="delPreviewImages(item)">
+              <DeleteOutlined />
+            </a>
+          </div>
+        </div>
       </div>
     </a-card>
   </header>
@@ -53,7 +61,7 @@
   import { ref } from 'vue'
   import ImageCard from '../../components/ImageCard'
   import WaterFallLayout from '../../layout/WaterFallLayout'
-  import { UploadOutlined } from '@ant-design/icons-vue'
+  import { UploadOutlined, DeleteOutlined } from '@ant-design/icons-vue'
 
   const filterMenu = [
     {
@@ -74,7 +82,8 @@
     components: {
       ImageCard,
       WaterFallLayout,
-      UploadOutlined
+      UploadOutlined,
+      DeleteOutlined
     },
     setup() {
       const images = ref([])
@@ -82,15 +91,20 @@
       const uploadImgs = ref(null)
 
       function onSearch(keywords = keywords.value) {
-        images.value = searchImg(keywords)
+        keywords.value = searchImg(keywords)
       }
 
       function selectImgFiles() {
         uploadImgs.value.click()
       }
 
-      function handleImageInput(e) {
-        images.value = formatImgFiles(e.target.files)
+      function delPreviewImages(item) {
+        images.value = images.value.filter(img => img.name !== item.name)
+      }
+
+      async function handleImageInput(e) {
+        const res = await formatImgFiles(e.target.files)
+        images.value = res
       }
 
       return {
@@ -100,7 +114,8 @@
         uploadImgs,
         onSearch,
         selectImgFiles,
-        handleImageInput
+        handleImageInput,
+        delPreviewImages
 
       }
     }
@@ -113,15 +128,7 @@
   }
 
   // 图片上传控件监听
-  function formatImgFiles(files) {
-    // console.log(e.target.files)
-    const images = []
-    files.forEach(item => {
-      getImage(item).then(res => {
-        images.push(res)
-      })
-    })
-
+  async function formatImgFiles(files) {
     function getImage(file) {
       const reader = new FileReader()
       const type = file.type
@@ -164,7 +171,7 @@
       })
       /* eslint-disable */
     }
-    return Promise.all(images)
+    return Promise.all([...files].map(item => getImage(item)))
   }
 </script>
 
@@ -213,5 +220,43 @@
   width: 0;
   height: 0;
   visibility: hidden;
+}
+
+.preview-groups {
+  margin-top: 24px;
+}
+.preview-group-item {
+  width: 100px;
+  height: 100px;
+  position: relative;
+
+  &:hover {
+    img {
+      filter: blur(1px);
+    }
+    .preview-del-btn {
+      opacity: 1;
+    }
+  }
+
+  img {
+    width: 100%;
+  }
+
+  .preview-del-btn {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    display: block;
+    text-align: center;
+    line-height: 100px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: fade(#000, 30);
+    font-size: 24px;
+    opacity: 0;
+    transition: .3s ease;
+  }
 }
 </style>
