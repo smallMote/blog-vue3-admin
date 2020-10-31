@@ -4,12 +4,11 @@ import Article from '../views/article/Article'
 import ArticleList from '../views/article/ArticleList'
 import Resources from '../views/resources/Resources'
 import Images from '../views/resources/Images'
+import Test from '../test/index'
+import EmitTest from '../test/EmitTest'
+import ArticleEditor from '../views/article/ArticleEditor'
 
-const routes = [
-	{
-		path: '/',
-		redirect: '/dashboard/analysis'
-	},
+const menu = [
 	{
 		path: '/dashboard',
 		menuText: 'Dashboard',
@@ -48,6 +47,31 @@ const routes = [
 				menuText: '图片管理'
 			}
 		]
+	},
+	{
+		path: '/test',
+		menuText: '测试组件',
+		component: Test,
+		redirect: '/test/emit',
+		children: [
+			{
+				path: '/test/emit',
+				component: EmitTest,
+				menuText: 'Emit'
+			}
+		]
+	}
+]
+
+const routes = [
+	...menu,
+	{
+		path: '/',
+		redirect: '/dashboard/analysis'
+	},
+	{
+		path: '/article/:id',
+		component: ArticleEditor
 	}
 ]
 
