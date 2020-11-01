@@ -60,7 +60,7 @@
   min-height: calc(100vh - 48px - 24px - 184px - 47px - 36px - 24px);
   & /deep/ .water-fall-item {
     position: absolute;
-    min-height: 300px;
+    /*min-height: 300px;*/
     transition: .4s ease;
   }
   &::-webkit-scrollbar {
