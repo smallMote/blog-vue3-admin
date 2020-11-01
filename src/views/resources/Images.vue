@@ -21,7 +21,7 @@
         />
       </div>
       <div class="image-header-bottom">
-        <input ref="uploadImgs" multiple @change="handleImageInput" id="uploadImg" type="file"/>
+        <input ref="uploadImgInput" multiple @change="handleImageInput" id="uploadImg" type="file"/>
         <a-space>
           <a-button @click="selectImgFiles()" type="primary">
             <UploadOutlined />
@@ -30,8 +30,8 @@
           <a-button type="primary">新建相册</a-button>
           <a-button type="primary">查看相册</a-button>
         </a-space>
-        <div v-show="images && images.length" class="preview-groups flex">
-          <div v-for="item in images" :key="item.name" class="preview-group-item">
+        <div v-show="uploadImgs && uploadImgs.length" class="preview-groups flex">
+          <div v-for="item in uploadImgs" :key="item.name" class="preview-group-item">
             <img :src="item.base64" :alt="item.name"/>
             <a href="" class="preview-del-btn" @click.prevent="delPreviewImages(item)">
               <DeleteOutlined />
@@ -52,13 +52,21 @@
       </div>
     </div>
     <WaterFallLayout>
-      <ImageCard v-for="item in 1" :key="`image-card-${item}`"/>
+      <ImageCard
+        v-for="item in images"
+        :key="`image-card-${item.id}`"
+        :url="item.url"
+        :title="item.title"
+        :description="item.description"
+        :link="item.link"
+      />
     </WaterFallLayout>
   </main>
 </template>
 
 <script>
   import { ref } from 'vue'
+  import request from '../../../api'
   import ImageCard from '../../components/ImageCard'
   import WaterFallLayout from '../../layout/WaterFallLayout'
   import { UploadOutlined, DeleteOutlined } from '@ant-design/icons-vue'
@@ -86,32 +94,38 @@
       DeleteOutlined
     },
     setup() {
-      const images = ref([])
+      const images = ref([]) // 服务器图片
       const keywords = ref('')
-      const uploadImgs = ref(null)
+      const uploadImgs = ref([]) // 上传的本地图片
+      const uploadImgInput = ref(null) // 上传图片控件
 
       function onSearch(keywords = keywords.value) {
         keywords.value = searchImg(keywords)
       }
 
       function selectImgFiles() {
-        uploadImgs.value.click()
+        uploadImgInput.value.click()
       }
 
       function delPreviewImages(item) {
-        images.value = images.value.filter(img => img.name !== item.name)
+        uploadImgs.value = images.value.filter(img => img.name !== item.name)
       }
 
       async function handleImageInput(e) {
         const res = await formatImgFiles(e.target.files)
-        images.value = res
+        uploadImgs.value = res
       }
+
+      getImages().then(res => {
+        images.value = res
+      })
 
       return {
         images,
         keywords,
-        filterMenu,
         uploadImgs,
+        filterMenu,
+        uploadImgInput,
         onSearch,
         selectImgFiles,
         handleImageInput,
@@ -125,6 +139,12 @@
   function searchImg(keywords) {
     console.log(keywords)
     return []
+  }
+
+  // 获取图片列表
+  async function getImages() {
+    const images = await request.get('/images')
+    return images.data
   }
 
   // 图片上传控件监听

@@ -3,9 +3,9 @@
     <template v-slot:cover>
       <img alt="example" :src="url" />
     </template>
-    <a-card-meta title="Lucky Cat">
+    <a-card-meta :title="title">
       <template v-slot:description>
-        www.zeroojs.com
+        {{ description }}
       </template>
     </a-card-meta>
     <template class="ant-card-actions" v-slot:actions>
