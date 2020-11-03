@@ -7,6 +7,7 @@ import Images from '../views/resources/Images'
 import Test from '../test/index'
 import EmitTest from '../test/EmitTest'
 import ArticleEditor from '../views/article/ArticleEditor'
+import BlobUrl from '../test/BlobUrl'
 
 const menu = [
 	{
@@ -58,6 +59,11 @@ const menu = [
 				path: '/test/emit',
 				component: EmitTest,
 				menuText: 'Emit'
+			},
+			{
+				path: '/test/blob-url',
+				component: BlobUrl,
+				menuText: 'BlobURL'
 			}
 		]
 	}
