@@ -11,7 +11,7 @@
     <template class="ant-card-actions" v-slot:actions>
       <copy-outlined key="copy"/>
       <edit-outlined key="edit" @click.prevent="openDialog(visible)"/>
-      <delete-outlined key="del"/>
+      <delete-outlined key="del" @click="delImage()"/>
     </template>
   </a-card>
   <a-modal
@@ -39,6 +39,7 @@ export default defineComponent({
     DeleteOutlined
   },
   props: {
+    id: [Number, String],
     url: {
       type: String,
       default: 'https://s2.ax1x.com/2019/07/09/Z6JKNd.jpg'
@@ -47,7 +48,8 @@ export default defineComponent({
     description: String,
     link: String
   },
-  setup() {
+  emits: ['del'],
+  setup(props, ctx) {
     const confirmLoading = ref(false)
     const visible = ref(false)
 
@@ -64,10 +66,15 @@ export default defineComponent({
       }, 500)
     }
 
+    function delImage() {
+      ctx.emit('del', props.id)
+    }
+
     return {
       visible,
       confirmLoading,
       handleOk,
+      delImage,
       openDialog
     }
   }

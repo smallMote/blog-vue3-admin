@@ -1,30 +1,41 @@
 <template>
-  <section ref="container" class="water-fall-container">
-    <slot class="water-fall-item"></slot>
+  <section class="water-fall-container">
+    <slot></slot>
+<!--    class="water-fall-item"-->
   </section>
 </template>
 
 <script>
-  import { defineComponent, onMounted, ref } from 'vue'
+  import { defineComponent, watch, nextTick, onUnmounted } from 'vue'
   import { waterFall, delay } from '../utils'
   export default defineComponent({
     name: 'WaterFallLayout',
-    setup() {
-      const container = ref(null)
-      onMounted(() => {
-        const innerWidth = document.documentElement.clientWidth || window.innerWidth
-        let columns = getColumns(innerWidth)
-        waterFall(container.value, columns)
-        window.onresize = function (e) {
-          columns = getColumns(e.target.innerWidth)
-          delay(() => {
-            waterFall(container.value, columns)
-          }, 500)
-        }
-      })
-      return {
-        container
+    props: {
+      done: Boolean
+    },
+    setup(props) {
+      function resize(e) {
+        const columns = getColumns(e.target.innerWidth)
+        const container = document.querySelector('.water-fall-container')
+        delay(() => {
+          waterFall(container, columns)
+        }, 500)
       }
+
+      watch(() => props.done, (val) => {
+        if (!val) return
+        nextTick(() => {
+          const innerWidth = document.documentElement.clientWidth || window.innerWidth
+          let columns = getColumns(innerWidth)
+          const container = document.querySelector('.water-fall-container')
+          waterFall(container, columns)
+          window.addEventListener('resize', resize)
+        })
+      }, { immediate: true })
+
+      onUnmounted(() => {
+        window.removeEventListener('resize', resize)
+      })
     }
   })
 
@@ -52,7 +63,7 @@
   }
 </script>
 
-<style lang="less" scoped>
+<style lang="less">
 .water-fall-container {
   position: relative;
   overflow-x: hidden;

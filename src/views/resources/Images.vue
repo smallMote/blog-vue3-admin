@@ -51,22 +51,28 @@
         <a class="image-filter-item" href="">已选 动作</a>
       </div>
     </div>
-    <WaterFallLayout>
-      <ImageCard
+    <WaterFallLayout :done="imageCardRender">
+      <div
         v-for="item in images"
         :key="`image-card-${item.id}`"
-        :url="item.url"
-        :title="item.title"
-        :description="item.description"
-        :link="item.link"
-      />
+        class="water-fall-item">
+        <ImageCard
+          :id="item.id"
+          :url="item.url"
+          :title="item.title"
+          :description="item.description"
+          :link="item.link"
+          @del="delImgs"
+        />
+      </div>
+<!--      @del="delImgs"-->
     </WaterFallLayout>
   </main>
 </template>
 
 <script>
   import { ref } from 'vue'
-  import request from '../../../api'
+  import request from '../../api'
   import ImageCard from '../../components/ImageCard'
   import WaterFallLayout from '../../layout/WaterFallLayout'
   import { UploadOutlined, DeleteOutlined } from '@ant-design/icons-vue'
@@ -98,13 +104,28 @@
       const keywords = ref('')
       const uploadImgs = ref([]) // 上传的本地图片
       const uploadImgInput = ref(null) // 上传图片控件
+      const selectedIds = ref([]) // 批量操作的图片id
+      const imageCardRender = ref(false) // 图片组件是否渲染完成
 
-      function onSearch(keywords = keywords.value) {
-        keywords.value = searchImg(keywords)
+      function onSearch(kws = keywords.value) {
+        keywords.value = searchImg(kws)
       }
 
       function selectImgFiles() {
         uploadImgInput.value.click()
+      }
+
+      async function delImgs(id) {
+        const res = await delImgsById(id || selectedIds.value)
+        if (res && res.code === 200) {
+          images.value = images.value.filter(item => {
+            if (selectedIds.value && selectedIds.value.length) {
+              return !selectedIds.value.includes(item.id)
+            } else {
+              return item.id !== id
+            }
+          })
+        }
       }
 
       function delPreviewImages(item) {
@@ -112,12 +133,12 @@
       }
 
       async function handleImageInput(e) {
-        const res = await formatImgFiles(e.target.files)
-        uploadImgs.value = res
+        uploadImgs.value = await formatImgFiles(e.target.files)
       }
 
       getImages().then(res => {
         images.value = res
+        imageCardRender.value = true
       })
 
       return {
@@ -126,6 +147,8 @@
         uploadImgs,
         filterMenu,
         uploadImgInput,
+        imageCardRender,
+        delImgs,
         onSearch,
         selectImgFiles,
         handleImageInput,
@@ -139,6 +162,15 @@
   function searchImg(keywords) {
     console.log(keywords)
     return []
+  }
+
+  // 删除图片
+  async function delImgsById(ids) {
+    if (/string|number/.test(typeof ids)) {
+      ids = [ ids ]
+    }
+    const res = await request.delete(`/images/${ids.toString()}`)
+    return { code: res.status, message: res.message }
   }
 
   // 获取图片列表
@@ -158,14 +190,14 @@
         reader.onloadstart = function (e) {
           // console.log('开始读取....', e)
         }
-        reader.onprogress = function (e) {
+        reader.onprogress = function () {
           // console.log('正在读取中....', e)
           if (!isTrueType) {
             console.log('类型不正确')
             return false
           }
         }
-        reader.onabort = function (e) {
+        reader.onabort = function () {
           // console.log('中断读取....', e)
           // console.log(file.type)
           if (!isTrueType) {
