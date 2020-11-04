@@ -24,20 +24,27 @@
         <input ref="uploadImgInput" multiple @change="handleImageInput" id="uploadImg" type="file"/>
         <a-space>
           <a-button @click="selectImgFiles()" type="primary">
-            <UploadOutlined />
-            上传图片
+            选择图片
           </a-button>
           <a-button type="primary">新建相册</a-button>
           <a-button type="primary">查看相册</a-button>
         </a-space>
         <div v-show="uploadImgs && uploadImgs.length" class="preview-groups flex">
           <div v-for="item in uploadImgs" :key="item.name" class="preview-group-item">
-            <img :src="item.base64" :alt="item.name"/>
+            <img :src="item.blobURL" :alt="item.name"/>
             <a href="" class="preview-del-btn" @click.prevent="delPreviewImages(item)">
               <DeleteOutlined />
             </a>
           </div>
         </div>
+        <a-button
+          v-show="uploadImgs && uploadImgs.length"
+          type="primary"
+          @click="handleUploadImgs()"
+        >
+          <UploadOutlined />
+          上传图片
+        </a-button>
       </div>
     </a-card>
   </header>
@@ -134,6 +141,23 @@
 
       async function handleImageInput(e) {
         uploadImgs.value = await formatImgFiles(e.target.files)
+        const res = await formatImgFiles(e.target.files)
+        console.log(res)
+        uploadImgs.value = res
+      }
+
+      async function handleUploadImgs() {
+        const formData = new FormData()
+        formData.append('file', uploadImgs.value)
+        // formData.append('album', 'like')
+        // formData.append('title', 'test other parmas')
+        const res = await request.post('/images', formData, {
+          headers: {
+            'content-type': 'multipart/form-data;'
+          }
+        })
+        if (!res) return
+        console.log(res)
       }
 
       getImages().then(res => {
@@ -150,6 +174,7 @@
         imageCardRender,
         delImgs,
         onSearch,
+        handleUploadImgs,
         selectImgFiles,
         handleImageInput,
         delPreviewImages
@@ -211,12 +236,13 @@
           console.log('成功读取....')
           // console.log(e.target.result)
           resolve({
-            reader,
+            // reader,
             lastModified: file.lastModified,
             type: file.type,
             size: file.size,
             name: file.name,
-            base64: e.target.result
+            // base64: e.target.result,
+            blobURL: URL.createObjectURL(new Blob([file]))
           })
         }
         reader.readAsDataURL(file)
@@ -275,14 +301,24 @@
 }
 
 .preview-groups {
-  margin-top: 24px;
+  margin: 24px 0;
+}
+.preview-group-item ~ .preview-group-item {
+  margin-left: 12px;
 }
 .preview-group-item {
   width: 100px;
   height: 100px;
   position: relative;
+  border: 1px solid fade(@theme-color, 50);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: fade(@theme-color, 10);
+  overflow: hidden;
 
   &:hover {
+    border-color: transparent;
     img {
       filter: blur(1px);
     }
