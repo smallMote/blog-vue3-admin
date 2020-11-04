@@ -1,6 +1,5 @@
 <template>
   <div id="editor-container"></div>
-  <a-button type="primary" @click="changeParents()">Update</a-button>
 </template>
 
 <script>
@@ -32,6 +31,7 @@
   export default defineComponent({
     name: 'Editor',
     props: {
+      modelValue: String,
       htmlSource: String
     },
     setup(props, ctx) {
@@ -72,17 +72,13 @@
         getContents(quill)
       }
 
-      const changeParents = () => {
-        console.log('changeParents')
-        ctx.emit('send', 123)
-      }
-
       watch(() => quillInfo.content, (c) => {
-        console.log('c', c)
+        if (!quill) return
+        ctx.emit('update:htmlSource', quill.getSource())
+        ctx.emit('update:modelValue', c)
       })
       return {
-        getQuillContent,
-        changeParents
+        getQuillContent
       }
     }
   })

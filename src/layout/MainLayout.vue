@@ -8,7 +8,7 @@
   <section class="main-layout-main clearfix">
     <header class="main-layout-header"></header>
     <main class="main-layout-content">
-      <router-view />
+      <router-view :key="$route.fullPath"/>
     </main>
   </section>
 </template>

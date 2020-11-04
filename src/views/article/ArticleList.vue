@@ -6,13 +6,13 @@
 					v-model:value="keywords"
 					placeholder="输入文章标题查询"
 					enter-button
-					@search="onSearch"
+					@search="onSearch()"
 					class="article-search"
 				/>
 			</div>
 		</template>
-		<template v-slot:articleTitle="{ text: title }">
-			<a>{{ title }}</a>
+		<template v-slot:articleTitle="{ text }">
+			<router-link :to="`/article/${text.id}`">{{ text.title }}</router-link>
 		</template>
 		<template v-slot:action>
 			<a-space>
@@ -25,7 +25,7 @@
 <script>
 	import { defineComponent, ref } from 'vue'
 	const columns = [
-		{ title: '文章标题', dataIndex: 'title', slots: { customRender: 'articleTitle' } },
+		{ title: '文章标题', slots: { customRender: 'articleTitle' } },
 		{ key: 'author', title: '作者', dataIndex: 'author' },
 		{ key: 'group', title: '分组', dataIndex: 'group' },
 		{ key: 'status', title: '状态', dataIndex: 'status' },
@@ -35,7 +35,8 @@
 		{ key: 'pushAt', title: '发布时间', dataIndex: 'pushAt' },
 		{ key: 'action', title: '操作', slots: { customRender: 'action' } }
 	]
-	export default defineComponent({
+
+	const ArticleList = defineComponent({
 		name: 'ArticleList',
     setup() {
 			const keywords = ref('')
@@ -49,8 +50,8 @@
 					status: 'PUSHED',
 					comments: 3,
 					views: 50,
-					createAt: +new Date(),
-					pushAt: +new Date()
+					createAt: new Date().toLocaleString(),
+					pushAt: new Date().toLocaleString()
 				}
 			])
 			// 搜索
@@ -65,6 +66,7 @@
 			}
     }
 	})
+	export default ArticleList
 </script>
 <style lang="less">
 	.article-search {
