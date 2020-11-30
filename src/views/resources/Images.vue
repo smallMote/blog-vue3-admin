@@ -161,6 +161,7 @@
       }
 
       getImages().then(res => {
+        console.log(res)
         images.value = res
         imageCardRender.value = true
       })

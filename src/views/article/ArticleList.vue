@@ -1,7 +1,10 @@
 <template>
 	<a-table :columns="columns" :data-source="articles">
 		<template v-slot:title>
-			<div class="flex flex-end">
+			<div class="list-action flex flex-between">
+				<a-button @click="$router.push('/article/new')" type="primary">
+					创作一片新文章
+				</a-button>
 				<a-input-search
 					v-model:value="keywords"
 					placeholder="输入文章标题查询"
@@ -24,6 +27,8 @@
 </template>
 <script>
 	import { defineComponent, ref } from 'vue'
+	import { getArticles } from '../../api/article.api'
+
 	const columns = [
 		{ title: '文章标题', slots: { customRender: 'articleTitle' } },
 		{ key: 'author', title: '作者', dataIndex: 'author' },
@@ -58,6 +63,10 @@
 			const onSearch = () => {
 				keywords.value = ''
 			}
+
+			getArticles().then(res => {
+				console.log(res)
+			})
 			return {
 				columns,
 				articles,
@@ -69,6 +78,9 @@
 	export default ArticleList
 </script>
 <style lang="less">
+	.list-action {
+		padding: 0 16px;
+	}
 	.article-search {
 		max-width: 400px;
 	}
