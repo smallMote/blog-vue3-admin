@@ -9,30 +9,55 @@
 			/>
 			<a-space>
 				<a-button ghost type="primary">保存到草稿箱</a-button>
-				<a-button type="primary">发布文章</a-button>
+				<a-button type="primary" @click="publish()">发布文章</a-button>
 			</a-space>
 		</div>
 	</header>
 	<Editor v-model:htmlSource="htmlSource" />
+	<a-modal
+		title="文章其他信息"
+		v-model:visible="visible"
+		destroyOnClose
+		keyboard>
+		<!--		发布前的表单-->
+		<article-publish/>
+		<template v-slot:footer>
+			<a-button @close="closeModel()">取消</a-button>
+			<a-button type="dashed">保存为草稿</a-button>
+			<a-button type="primary">发布文章</a-button>
+		</template>
+	</a-modal>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
+import { defineComponent, ref } from 'vue'
 import Editor from '../../components/Editor'
+import ArticlePublish from '../../components/article/ArticlePublish'
 
 export default defineComponent({
 	name: 'ArticleEditor',
 	components: {
-		Editor
+		Editor,
+		ArticlePublish
 	},
-	data() {
-		return {
-			htmlSource: 'htmlSource'
+	setup() {
+		const htmlSource = ref('')
+		const visible = ref(false)
+
+		// 发布文章
+		const publish = () => {
+			visible.value = true
 		}
-	},
-	methods: {
-		send(val) {
-			console.log('customUpdate', val)
+		// 关闭对话框
+		const closeModel = () => {
+			visible.value = false
+		}
+
+		return {
+			visible,
+			htmlSource,
+			publish,
+			closeModel
 		}
 	}
 })
