@@ -36,17 +36,19 @@
 </template>
 <script>
 	import { reactive, toRefs, watch, ref } from 'vue'
+	import { articleGroups } from '../../api/article.api'
 
-	const genRanStr = () => {
-		return Math.random().toString(16).substr(2)
-	}
+	// const genRanStr = () => {
+	// 	return Math.random().toString(16).substr(2)
+	// }
 
-	const defGroup = [
-		{ id: 1, name: '前端' }
-	]
 	export default {
 		name: 'ArticlePublish',
-		setup() {
+		props: {
+			articleGroups: Array
+		},
+		emits: ['get-groups'],
+		setup(props) {
 			const newGroup = ref('')
 			const form = reactive({
 				group: null,
@@ -54,17 +56,17 @@
 				publish: 'public', // 发布形式
 			})
 			// 专栏
-			const groups = ref(defGroup)
+			const groups = ref(props.articleGroups)
 
 			// 添加专栏
-			const addGroup = () => {
+			const addGroup = async () => {
 				if (!newGroup.value || groups.value.findIndex(item => item.name === newGroup.value) > -1) {
 					return
 				}
-				groups.value.unshift({
-					id: genRanStr(),
-					name: newGroup.value
-				})
+				const res = await articleGroups('create', { name: newGroup.value })
+				if (res.status === 200) {
+					groups.value.unshift(res.data)
+				}
 				newGroup.value = ''
 			}
 

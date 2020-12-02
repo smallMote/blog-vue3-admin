@@ -20,7 +20,9 @@
 		destroyOnClose
 		keyboard>
 		<!--		发布前的表单-->
-		<article-publish/>
+		<article-publish
+			:article-groups="groups"
+			@get-groups="getGroups"/>
 		<template v-slot:footer>
 			<a-button @close="closeModel()">取消</a-button>
 			<a-button type="dashed">保存为草稿</a-button>
@@ -33,6 +35,7 @@
 import { defineComponent, ref } from 'vue'
 import Editor from '../../components/Editor'
 import ArticlePublish from '../../components/article/ArticlePublish'
+import { articleGroups } from '../../api/article.api'
 
 export default defineComponent({
 	name: 'ArticleEditor',
@@ -43,6 +46,7 @@ export default defineComponent({
 	setup() {
 		const htmlSource = ref('')
 		const visible = ref(false)
+		const groups = ref([])
 
 		// 发布文章
 		const publish = () => {
@@ -53,10 +57,20 @@ export default defineComponent({
 			visible.value = false
 		}
 
+		// 获取文章专栏
+		const getGroups = () => {
+			articleGroups().then(res => {
+				groups.value = res.data
+			})
+		}
+		getGroups()
+
 		return {
+			groups,
 			visible,
 			htmlSource,
 			publish,
+			getGroups,
 			closeModel
 		}
 	}
